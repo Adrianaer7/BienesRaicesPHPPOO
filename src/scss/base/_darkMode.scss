@@ -9,6 +9,10 @@
         color: $gris;
     }
 
+    p, th, thead, tr, td {
+        color: $blanco;
+    }
+
     .anuncio,
     .resumen-propiedad {
         background-color: $grisOscuro;

@@ -1,4 +1,7 @@
 <?php 
+    require "../../includes/funciones.php";
+    incluirTemplate("header", $pagina = "Admin - Crear");
+
     //Base de datos
     require "../../includes/config/database.php";
     $db = conectarDB();
@@ -72,14 +75,15 @@
                 mkdir($carpetaImagenes);    //crea la carpeta
             }
             //Generar un nombre unico para cada archivo
-            $nombreImagen = md5(uniqid(rand(), true));  //mk5 devuelve un hash estatico. iniqid genera aleatorios
+            $extension = pathinfo($imagen["name"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
+            $nombreImagen = md5(uniqid(rand(), true)).".$extension";  //mk5 devuelve un hash estatico. iniqid genera aleatorios
             //Guardar archivo en carpeta
-            move_uploaded_file($imagen["tmp_name"], $carpetaImagenes . "${nombreImagen}.jpg");
+            move_uploaded_file($imagen["tmp_name"], $carpetaImagenes . $nombreImagen);
 
 
             //Insertar en la bd
             $query = "INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, creado, vendedores_id) 
-                      VALUES ('$titulo', '$precio', '$nombreImagen', '$descripcion', '$habitaciones', '$wc', '$estacionamiento', '$creado', '$vendedores_id')";
+                      VALUES ('$titulo', $precio, '$nombreImagen', '$descripcion', $habitaciones, $wc, $estacionamiento, '$creado', $vendedores_id)";
     
             $resultado = mysqli_query($db, $query);
 
@@ -90,13 +94,11 @@
         }
     }
 
-    require "../../includes/funciones.php";
-    incluirTemplate("header", $pagina = "Admin - Crear");
 ?>
 
 
     <main class="contenedor seccion">
-        <h1>Crear</h1>
+        <h1>Crear propiedad</h1>
         <a href="/admin" class="boton boton-verde">Volver</a>
         <?php foreach($errores as $error) { ?>
             <div class="alerta error">

@@ -9,10 +9,9 @@
     //Escribir el Query
     $query = "SELECT * FROM propiedades";
     //Consultar a la BD
-    $resultado = mysqli_query($db, $query);
+    $resultadoConsulta = mysqli_query($db, $query);
 
-    exit;
-    $resultado = $_GET["resultado"] ?? null;    //busca el resultado en la URL y si no existe le asigno null
+    $resultado = $_GET["resultado"] ?? null;    //busca el resultado(variable que le paso al crear una nueva propiedad) en la URL y si no existe le asigno null
     
 ?>
 
@@ -22,6 +21,8 @@
         <h1>Administrador de bienes raices</h1>
         <?php if(intval($resultado) === 1) { ?> <!--intval convierte el valor a numero-->
             <p class="alerta exito">Propiedad cargada correctamente</p>
+        <?php } elseif(intval($resultado == 2)) { ?>
+            <p class="alerta exito">Propiedad actualizada correctamente</p>
         <?php } ?>
         <a href="/admin/propiedades/crear.php" class="boton boton-verde">Nueva propiedad</a>     
         <table class="propiedades">
@@ -35,22 +36,24 @@
                 </tr>
             </thead>
             <tbody>
+                <?php while($propiedad = mysqli_fetch_assoc($resultadoConsulta)) { ?>
                 <tr>
-                    <td>1</td>
-                    <td>Casa en la playa</td>
-                    <td><img src="/imagenes/archivo.jpg" class="imagen-tabla"></td>
-                    <td>$120000</td>
+                    <td><?php echo $propiedad["id"]; ?></td>
+                    <td><?php echo $propiedad["titulo"]; ?></td>
+                    <td><img src="/imagenes/<?php echo $propiedad["imagen"]?>" class="imagen-tabla"></td>
+                    <td>$<?php echo $propiedad["precio"]; ?></td>
                     <td>
                         <a href="#" class="boton-rojo-block">Eliminar</a>
-                        <a href="#" class="boton-amarillo-block">Actualizar</a>
+                        <a href="admin/propiedades/actualizar.php?id=<?php echo $propiedad["id"] ?>" class="boton-amarillo-block">Actualizar</a>
                     </td>
                 </tr>
+                <?php } ?>
             </tbody>
         </table>
     </main>
 
 <?php 
     //Cerrar la conexion
-
+    mysqli_close($db);
     incluirTemplate("footer");
 ?>
