@@ -1,7 +1,23 @@
 <?php 
     require "includes/funciones.php";
-
     incluirTemplate("header", $pagina = "Anuncio");
+
+    $id = $_GET["id"];
+    $id = filter_var($id, FILTER_VALIDATE_INT );
+    if(!$id) {
+        header("Location:/admin");
+    }
+    //Conectar a la DB
+    require "includes/config/database.php";
+    $db = conectarDB();
+
+    //Consulta
+    $query = "SELECT * FROM PROPIEDADES WHERE id = $id";
+    if(!$query) {
+        header("Location:/admin");
+    }
+    $resultado = mysqli_query($db, $query);
+    $propiedad = mysqli_fetch_assoc($resultado);
 ?>
 
 
