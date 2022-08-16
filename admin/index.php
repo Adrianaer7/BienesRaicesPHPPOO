@@ -1,8 +1,13 @@
 <?php 
-   
+    
+
     //Importar template
     require "../includes/funciones.php";
     incluirTemplate("header", $pagina = "Admin - Inicio");
+    $auth = estadoAutenticado();
+    if(!$auth) {
+        header("Location: /");
+    }
 
     //Importar la conexion
     require "../includes/config/database.php";

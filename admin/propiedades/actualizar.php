@@ -1,7 +1,10 @@
 <?php 
     require "../../includes/funciones.php";
     incluirTemplate("header", $pagina = "Admin - Actualizar");
-
+    $auth = estadoAutenticado();
+    if(!$auth) {
+        header("Location: /");
+    }
     //Validar que el id por URL que recibo sea numero entero
     $id = $_GET["id"];
     $id = filter_var($id, FILTER_VALIDATE_INT);

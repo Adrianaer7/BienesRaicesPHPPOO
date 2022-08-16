@@ -1,7 +1,10 @@
 <?php 
     require "../../includes/funciones.php";
     incluirTemplate("header", $pagina = "Admin - Crear");
-
+    $auth = estadoAutenticado();
+    if(!$auth) {
+        header("Location: /");
+    }
     //Base de datos
     require "../../includes/config/database.php";
     $db = conectarDB();
