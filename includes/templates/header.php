@@ -3,7 +3,7 @@
     if(!isset($_SESSION)) { //la sesion se inicia en este header y en la pagina que importe la funcion estadoAutenticado(). Si se importa acá y en esa pagina, lanza un msj indicandote que ya estaba inciada la sesion. Entonces con este if, la sesion se va a iniciar solamente si no hay una sesion iniciada previamente
         session_start();
     }
-    $auth = $_SESSION["login"] ?? false; //devuelve null si el usuario no está autenticado
+    $auth = $_SESSION["login"] ?? false; //devuelve false si el usuario no está autenticado
     
 ?>
 <!DOCTYPE html>
@@ -33,7 +33,9 @@
                         <a href="blog.php">Blog</a>
                         <a href="contacto.php">Contacto</a>
                         <?php if($auth) { ?>
-                            <a href="cerrar-sesion.php">Cerrar Sesion</a>
+                            <a href="cerrar-sesion.php">Cerrar Sesión</a>
+                        <?php } else { ?>
+                            <a href="login.php">Iniciar Sesión</a>
                         <?php } ?>
                     </nav>
                 </div>

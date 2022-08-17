@@ -28,17 +28,17 @@
             $resultado = mysqli_query($db, $query); //devuelve un objeto
 
             if($resultado->num_rows) {  //num_rows da 1 si existe el usuario, sino devuelve 0. Con la flecha accedo a una propiedad de un objeto
+
                 //Revisar si el password es correcto
                 $usuario = mysqli_fetch_assoc($resultado);
                 $auth = password_verify($password, $usuario["password"]); 
                 
                 if($auth) { //si el email y la contraseña son iguales a la de la bd
                     session_start();    //inicio sesion
-                    $_SESSION["usuario"] = $usuario["email"];   //en la variable superglobal $_SESSION puedo guardar el dato que quiera. Las propiedades las invento yo
+                    $_SESSION["usuario"] = $usuario["email"];   //en la variable superglobal $_SESSION puedo guardar el dato que quiera y se puede acceder a ella desde cualquier parte del proyecto, siempre y cuando se llame a la funcion session_start(). Las propiedades las invento yo
                     $_SESSION["login"] = true;
 
                     header("Location: /admin");
-
                 } else {
                     $errores[] = "El password es incorrecto";
                 }
