@@ -50,7 +50,10 @@
             $query .= ") VALUES ('";
             $query .= join("', '", array_values($atributos));   //array_values son los valores de las columnas
             $query .= "')";
-            self::$db->query($query);  //resultado devuelve true. Con db->query accedo al metodo que forma parte de la instancia de mysqli y sirve para hacer la consulta
+
+            $resultado = self::$db->query($query);  //resultado devuelve true. Con db->query accedo al metodo que forma parte de la instancia de mysqli y sirve para hacer la consulta
+            
+            return $resultado;
         }
 
         //Identificar y unir los atributos de la BD
@@ -103,9 +106,15 @@
             if(!$this->imagen) {
                 self::$errores[] = "La imagen es obligatoria";
             }
-           
-
             return self::$errores;
+        }
+
+        //Subida de archivos
+        public function setImagen($imagen) {
+            //Asignar al atributo de imagen el nombre de la imagen
+            if($imagen) {
+                $this->imagen = $imagen;
+            }
         }
     }
     

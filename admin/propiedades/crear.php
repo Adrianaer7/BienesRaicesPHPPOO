@@ -1,7 +1,8 @@
 <?php 
     require "../../includes/app.php";
     use App\Propiedad;
-    
+    use Intervention\Image\ImageManagerStatic as Image;
+
     incluirTemplate("header", $pagina = "Admin - Crear");
     estadoAutenticado();
 
@@ -28,32 +29,31 @@
         //Instancio la clase
         $propiedad = new Propiedad($_POST);
 
+        //Generar un nombre unico para cada archivo
+        $extension = pathinfo($_FILES["imagen"]["name"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
+        $nombreImagen = md5(uniqid(rand(), true)).".$extension";  //mk5 devuelve un hash estatico. iniqid genera aleatorios
+
+        //Realizar resize a la imagen con Intervention
+        if($_FILES["imagen"]["tmp_name"]) {  //si existe una imagen
+            $image = Image::make($_FILES["imagen"]["tmp_name"])->fit(800,600);  //hago un recorte de resolucion de la imagen
+            $propiedad->setImagen($nombreImagen);   //envio el nombre de la imagen a la propiedad de la clase
+        }
+
         //Valido los datos
         $errores = $propiedad->validar();
 
-        
         //Revisar que el array de errores esté vacio
         if(empty($errores)) {
-            //Asignar files hacia una variable. Los archivos no se leen por $_POST, sino por $_FILES
-            $imagen = $_FILES["imagen"];    //accedo al name del input
-            $propiedad->guardar();  //guardo en la BD
-            //Crear carpeta para subir archivo
-            $carpetaImagenes = "../../imagenes/";   //guardo la ubicacion donde quiero que se cree la carpeta
-            if(!is_dir($carpetaImagenes)) { //verifica si esa carpeta ya está creada
-                mkdir($carpetaImagenes);    //crea la carpeta
+            //Crear carpeta para las imagenes si no existe
+            if(!is_dir(CARPETA_IMAGENES)) { //carpeta_imagenes viene de funciones.php
+                mkdir(CARPETA_IMAGENES);
             }
-            //Generar un nombre unico para cada archivo
-            $extension = pathinfo($imagen["name"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
-            $nombreImagen = md5(uniqid(rand(), true)).".$extension";  //mk5 devuelve un hash estatico. iniqid genera aleatorios
-            //Guardar archivo en carpeta
-            move_uploaded_file($imagen["tmp_name"], $carpetaImagenes . $nombreImagen);
 
-
-            //Insertar en la bd
-            $query = "INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, creado, vendedores_id) 
-                      VALUES ('$titulo', $precio, '$nombreImagen', '$descripcion', $habitaciones, $wc, $estacionamiento, '$creado', $vendedores_id)";
-    
-            $resultado = mysqli_query($db, $query);
+            //Guarda la imagen en la carpeta
+            $image->save(CARPETA_IMAGENES . $nombreImagen);
+            echo 
+            //Guardo en la BD
+            $resultado = $propiedad->guardar();
 
             //Redireccionar
             if($resultado) {
