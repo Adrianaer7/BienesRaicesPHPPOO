@@ -1,8 +1,8 @@
 <?php
-
 declare(strict_types=1);
 
-require "app.php";
+define("TEMPLATES_URL", __DIR__ . "/templates");    //__DIR__ es una funcion de php que trae toda la ruta anterior a templates. A la ruta le agrego el nombre TEMPLATES_URL para que sea mas facil importarla
+define("FUNCIONES_URL", __DIR__ . "/funciones.php");
 
 function incluirTemplate(string $nombre, string $pagina = "Bienes Raices", bool $inicio = false ) {    //importo de cada pagina el nombre de lo que quiero importar. Lo uso para importar header y footer. Si inicio me llega como true, agrego la clase inicio al header
     include TEMPLATES_URL . "/{$nombre}.php";
@@ -10,11 +10,16 @@ function incluirTemplate(string $nombre, string $pagina = "Bienes Raices", bool 
 
 function estadoAutenticado() : bool {
     session_start();
-    $auth = $_SESSION["login"];
     //Verificar usuario autenticado
-    if($auth) {
-        return true;
+    if(!$_SESSION["login"]) {
+        header("Location: /");
     }
+    return true;
+}
 
-    return false;
+function debugear($variable) {
+    echo '<pre>';
+        var_dump($variable);
+    echo '</pre>';
+    exit;
 }

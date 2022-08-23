@@ -1,5 +1,5 @@
 <?php 
-    require "includes/funciones.php";
+    require "includes/app.php";
     incluirTemplate("header", $pagina = "Anuncio");
 
     $id = $_GET["id"];
@@ -8,7 +8,6 @@
         header("Location:/admin");
     }
     //Conectar a la DB
-    require "includes/config/database.php";
     $db = conectarDB();
 
     //Consulta

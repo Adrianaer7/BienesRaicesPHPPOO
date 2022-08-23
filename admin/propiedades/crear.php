@@ -1,12 +1,11 @@
 <?php 
-    require "../../includes/funciones.php";
+    require "../../includes/app.php";
+    use App\Propiedad;
+    
     incluirTemplate("header", $pagina = "Admin - Crear");
-    $auth = estadoAutenticado();
-    if(!$auth) {
-        header("Location: /");
-    }
+    estadoAutenticado();
+
     //Base de datos
-    require "../../includes/config/database.php";
     $db = conectarDB();
 
     //Consultar para obtener los vendedores
@@ -14,7 +13,7 @@
     $resultado = mysqli_query($db, $consulta);
 
     //Arreglo con mensaje de error
-    $errores = [];
+    $errores = Propiedad::getErrores(); //la primera vez va a estar vacio. Esto es para que no marque unedefined
 
     $titulo = "";
     $precio = "";
@@ -26,52 +25,18 @@
 
     //Ejecutar el codigo despues que el usuario envia el codigo
     if($_SERVER["REQUEST_METHOD"] === "POST") {
+        //Instancio la clase
+        $propiedad = new Propiedad($_POST);
+
+        //Valido los datos
+        $errores = $propiedad->validar();
+
         
-        $titulo = mysqli_escape_string($db, $_POST["titulo"]);  //mysqli_escape_string sanitiza el campo, en caso que injecten una sentencia de sql o scripting, guarda eso como string y no como ejecutable en la bd 
-        $precio = mysqli_escape_string($db, $_POST["precio"]);
-        $descripcion = mysqli_escape_string($db, $_POST["descripcion"]);
-        $habitaciones = mysqli_escape_string($db, $_POST["habitaciones"]);
-        $wc = mysqli_escape_string($db, $_POST["wc"]);
-        $estacionamiento = mysqli_escape_string($db, $_POST["estacionamiento"]);
-        $vendedores_id = mysqli_escape_string($db, $_POST["vendedor"]);
-        $creado = date("Y/m/d");
-        
-        //Asignar files hacia una variable. Los archivos no se leen por $_POST, sino por $_FILES
-        $imagen = $_FILES["imagen"];    //accedo al name del input
-
-        if(!$titulo) {
-            $errores[] = "El titulo es obligatorio";
-        }
-        if(!$precio) {
-            $errores[] = "El precio es obligatorio";
-        }
-        if(strlen($descripcion) < 50) {
-            $errores[] = "La descripcion es obligatoria y tiene que tener como minimo 50 caracteres";
-        }
-        if(!$habitaciones) {
-            $errores[] = "El numero de habitaciones es obligatorio";
-        }
-        if(!$wc) {
-            $errores[] = "El numero de baños es obligatorio";
-        }
-        if(!$estacionamiento) {
-            $errores[] = "La capacidad del garage es obligatorio";
-        }
-        if(!$vendedores_id) {
-            $errores[] = "El nombre del vendedor es obligatorio";
-        }
-        if(!$imagen["name"]) {
-            $errores[] = "La imagen es obligatoria";
-        }
-
-        //Validar imagen por tamaño
-        $medida = 1000 * 1000;   //bytes a kb (1Mb maximo)
-        if($imagen["size"] > $medida) {
-            $errores[] = "La imagen es muy pesada";
-        }
-
         //Revisar que el array de errores esté vacio
         if(empty($errores)) {
+            //Asignar files hacia una variable. Los archivos no se leen por $_POST, sino por $_FILES
+            $imagen = $_FILES["imagen"];    //accedo al name del input
+            $propiedad->guardar();  //guardo en la BD
             //Crear carpeta para subir archivo
             $carpetaImagenes = "../../imagenes/";   //guardo la ubicacion donde quiero que se cree la carpeta
             if(!is_dir($carpetaImagenes)) { //verifica si esa carpeta ya está creada
@@ -192,7 +157,7 @@
             <fieldset>
                 <legend>Vendedor</legend>
 
-                <select name="vendedor">
+                <select name="vendedores_id">
                     <option value="">--Seleccione--</option>
                     <?php while($vendedor = mysqli_fetch_assoc($resultado)) { ?>    <!--el assoc convierte la tabla obtenida en un array asociativo-->
                         <!--al option le agrego la clase selected si ya envie el formulario y el id que envié es igual al que se encontró en la consulta a la bd-->

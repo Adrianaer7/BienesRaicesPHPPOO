@@ -1,10 +1,13 @@
 <?php 
     //Importar template
-    require "includes/funciones.php";
+    require "includes/app.php";
     incluirTemplate("header");
+    session_start();
+    if($_SESSION["login"]) {
+        header("Location: /admin");
+    }
 
     //Importar BD
-    require "includes/config/database.php";
     $db = conectarDB();
 
     //Autinticar el usuario

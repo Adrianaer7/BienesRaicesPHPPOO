@@ -1,3 +1,11 @@
 <?php
-define("TEMPLATES_URL", __DIR__ . "/templates");    //__DIR__ es una funcion de php que trae toda la ruta anterior a templates. A la ruta le agrego el nombre TEMPLATES_URL para que sea mas facil importarla
-define("FUNCIONES_URL", __DIR__ . "/funciones.php");
+require "funciones.php";    //importo funciones
+require "config/database.php";  //importo bd
+require __DIR__ . "/../vendor/autoload.php";    //importo clases
+
+//Conectar DB
+$db = conectarDB();
+
+use App\Propiedad;
+
+Propiedad::setDB($db);  //Con Propiedad:: puedo ejecutar metodos que estén en la clase Propiedad fuera del archivo donde se declara la clase. Envio la $db al metodo estatico de la clase

@@ -1,16 +1,10 @@
 <?php 
-    
-
     //Importar template
-    require "../includes/funciones.php";
+    require "../includes/app.php";
     incluirTemplate("header", $pagina = "Admin - Inicio");
-    $auth = estadoAutenticado();
-    if(!$auth) {
-        header("Location: /");
-    }
+    estadoAutenticado();
 
     //Importar la conexion
-    require "../includes/config/database.php";
     $db = conectarDB();
     //Escribir el Query
     $query = "SELECT * FROM propiedades";
