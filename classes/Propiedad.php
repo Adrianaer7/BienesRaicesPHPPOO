@@ -52,7 +52,6 @@
             $query .= "')";
 
             $resultado = self::$db->query($query);  //resultado devuelve true. Con db->query accedo al metodo que forma parte de la instancia de mysqli y sirve para hacer la consulta
-            
             return $resultado;
         }
 
@@ -115,6 +114,43 @@
             if($imagen) {
                 $this->imagen = $imagen;
             }
+        }
+
+        //Listar todas las propiedades
+        public static function all() {
+           $query = "SELECT * FROM propiedades";
+           //Consulto la bd y cambio el array con arrays asociativos que me devuelve sql, por un array de objetos
+           $resultado = self::consultarSQL($query);
+
+           //Envio el resultado al index
+           return $resultado;
+        }
+
+        public static function consultarSQL($query) {   //traigo el string
+            //Consultar la BD
+            $resultado = self::$db->query($query);
+
+            //Iterar los resultados
+            $array = [];
+            while($registro = $resultado->fetch_assoc()) {  //por cada elemento que hay en $resultado
+                $array[] = self::crearObjeto($registro);    //lo inserto en el array en forma de objeto
+            }
+            
+            //Liberar memoria
+            $resultado->free();
+
+            //Retornar los resultados
+            return $array;
+        }
+
+        protected static function crearObjeto($registro) {
+            $objeto = new self; //crea nuevos objetos de la clase actual con sus propiedades vacias. Es como crear una nueva instancia. ACtiveRecord trabaja con objetos no con arreglos asociativos para agrupar las propiedades
+            foreach($registro as $key => $value) {  //recorro el array asociativo
+                if(property_exists($objeto, $key)) {    //si existe propiedad
+                    $objeto->$key = $value; //le asigno el valor que hay en el array asociativo a la columna del objeto
+                }
+            }
+            return $objeto;
         }
     }
     

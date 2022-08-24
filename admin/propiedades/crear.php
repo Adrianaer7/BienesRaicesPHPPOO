@@ -9,20 +9,15 @@
     //Base de datos
     $db = conectarDB();
 
+    //Instancia vacia
+    $propiedad = new Propiedad;
+
     //Consultar para obtener los vendedores
     $consulta = "SELECT * FROM vendedores";
     $resultado = mysqli_query($db, $consulta);
 
     //Arreglo con mensaje de error
     $errores = Propiedad::getErrores(); //la primera vez va a estar vacio. Esto es para que no marque unedefined
-
-    $titulo = "";
-    $precio = "";
-    $descripcion = "";
-    $habitaciones = "";
-    $wc = "";
-    $estacionamiento = "";
-    $vendedores_id = "";
 
     //Ejecutar el codigo despues que el usuario envia el codigo
     if($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -51,7 +46,7 @@
 
             //Guarda la imagen en la carpeta
             $image->save(CARPETA_IMAGENES . $nombreImagen);
-            echo 
+             
             //Guardo en la BD
             $resultado = $propiedad->guardar();
 
@@ -81,95 +76,7 @@
             class="formulario" 
             enctype="multipart/form-data"
         >
-            <fieldset>
-                <legend>Informacion general</legend>
-
-                <label for="titulo">Titulo:</label>
-                <input 
-                    type="text" 
-                    name="titulo" 
-                    id="titulo" 
-                    placeholder="Titulo Propiedad" 
-                    value="<?php echo $titulo ?>"
-                >
-
-                <label for="precio">Precio:</label>
-                <input 
-                    type="number" 
-                    name="precio" 
-                    id="precio" 
-                    placeholder="Precio Propiedad" 
-                    value="<?php echo $precio ?>"
-                >
-
-                <label for="imagen">Imagen:</label>
-                <input 
-                    type="file" 
-                    name="imagen" 
-                    id="imagen"
-                    accept="image/jpeg, image/png" 
-                >
-
-                <label for="descripcion">Descripcion:</label>
-                <textarea 
-                    name="descripcion" 
-                    id="descripcion"
-                ><?php echo $descripcion; ?></textarea>
-            </fieldset>
-
-            <fieldset>
-                <legend>Informacion Propiedad</legend>
-
-                <label for="habitaciones">Habitaciones:</label>
-                <input 
-                    type="number" 
-                    name="habitaciones" 
-                    id="habitaciones" 
-                    placeholder="Ej. 3" 
-                    min="1" 
-                    max="9" 
-                    value="<?php echo $habitaciones ?>"
-                >
-
-                <label for="wc">Baños:</label>
-                <input 
-                    type="number" 
-                    name="wc" 
-                    id="wc" 
-                    placeholder="Ej. 1" 
-                    min="1"
-                    max="9" 
-                    value="<?php echo $wc ?>"
-                >
-
-                <label for="estacionamiento">Estacionamiento:</label>
-                <input 
-                    type="number" 
-                    name="estacionamiento" 
-                    id="estacionamiento" 
-                    placeholder="Ej. 2" 
-                    min="1" 
-                    max="9" 
-                    value="<?php echo $estacionamiento ?>"
-                >
-            </fieldset>
-
-            <fieldset>
-                <legend>Vendedor</legend>
-
-                <select name="vendedores_id">
-                    <option value="">--Seleccione--</option>
-                    <?php while($vendedor = mysqli_fetch_assoc($resultado)) { ?>    <!--el assoc convierte la tabla obtenida en un array asociativo-->
-                        <!--al option le agrego la clase selected si ya envie el formulario y el id que envié es igual al que se encontró en la consulta a la bd-->
-                        <option 
-                            value="<?php echo $vendedor["id"];?>"
-                            <?php echo $vendedores_id === $vendedor["id"] ? "selected" : ""; ?> 
-                        >
-                            <?php echo $vendedor["nombre"]." ".$vendedor["apellido"]; ?>
-                        </option>
-                    <?php }; ?>
-                </select>
-            </fieldset>
+            <?php include "../../includes/templates/formulario_propiedades.php"; ?>
 
             <input 
                 type="submit" 

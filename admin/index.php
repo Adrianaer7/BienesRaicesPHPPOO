@@ -1,21 +1,19 @@
 <?php 
     //Importar template
     require "../includes/app.php";
+    use App\Propiedad;
+
     incluirTemplate("header", $pagina = "Admin - Inicio");
     estadoAutenticado();
 
-    //Importar la conexion
-    $db = conectarDB();
-    //Escribir el Query
-    $query = "SELECT * FROM propiedades";
-    //Consultar a la BD
-    $resultadoConsulta = mysqli_query($db, $query);
+    //Obtener las propiedades
+    $propiedades = Propiedad::all();
 
     $resultado = $_GET["resultado"] ?? null;    //busca el resultado(variable que le paso al crear una nueva propiedad) en la URL y si no existe le asigno null
 
     //Cuando presione en eliminar
     if($_SERVER["REQUEST_METHOD"] === "POST") {
-        $id = $_POST["id"];
+        $id = $_POST["id"]; //id es el name del input
         $id = filter_var($id, FILTER_VALIDATE_INT); //valida que sea un numero
 
         if($id) {
@@ -34,10 +32,7 @@
             }
         }
     }
-
 ?>
-
-
 
     <main class="contenedor seccion">
         <h1>Administrador de bienes raices</h1>
@@ -61,19 +56,19 @@
                 </tr>
             </thead>
             <tbody>
-                <?php while($propiedad = mysqli_fetch_assoc($resultadoConsulta)) { ?>
+                <?php foreach($propiedades as  $propiedad) { ?>
                 <tr>
-                    <td><?php echo $propiedad["id"]; ?></td>
-                    <td><?php echo $propiedad["titulo"]; ?></td>
-                    <td><img src="/imagenes/<?php echo $propiedad["imagen"]?>" class="imagen-tabla" alt="imagen propiedad"></td>
-                    <td>$<?php echo $propiedad["precio"]; ?></td>
+                    <td><?php echo $propiedad->id; ?></td>
+                    <td><?php echo $propiedad->titulo; ?></td>
+                    <td><img src="/imagenes/<?php echo $propiedad->imagen?>" class="imagen-tabla" alt="imagen propiedad"></td>
+                    <td>$<?php echo $propiedad->precio; ?></td>
                     <td>
                         <form method="POST" class="w-100">
-                            <input type="hidden" name="id" value="<?php echo $propiedad["id"] ?>">
+                            <input type="hidden" name="id" value="<?php echo $propiedad->id ?>">
                             <input type="submit" class="boton-rojo-block" value="Eliminar">
                         </form>
                         <a 
-                            href="admin/propiedades/actualizar.php?id=<?php echo $propiedad["id"] ?>" 
+                            href="admin/propiedades/actualizar.php?id=<?php echo $propiedad->id ?>" 
                             class="boton-amarillo-block"
                         >
                             Actualizar
