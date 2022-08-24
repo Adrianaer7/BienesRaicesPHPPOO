@@ -21,7 +21,7 @@
         public $creado;
         public $vendedores_id;
 
-        //Definir la conexion a la BD
+        //DEFINIR CONEXION A LA BD
         public static function setDB($database) {   //recibo $dabatase del app.php que es donde se ejecuta este metodo
             self::$db = $database;  //con self:: envio database a la variable estatica que hay en la clase 
         }
@@ -40,7 +40,36 @@
             $this->vendedores_id = $args["vendedores_id"] ?? "";
         }
 
-        public function guardar() {
+        //Subida de archivos
+        public function setImagen($imagen) {
+            //Asignar al atributo de imagen el nombre de la imagen
+            if($imagen) {
+                $this->imagen = $imagen;
+            }
+        }
+
+        //Identificar y unir los atributos de la BD
+        public function atributos() : array {
+            $atributos = [];
+            foreach(self::$columnasDB as  $columna) {
+                if($columna === "id") continue; //al id no hay que sanitizarlo, por eso no lo guardo en el array atributos. El continue hace que no se ejecute lo que esté debajo, y el foreach siga con el siguiente elemento
+                $atributos[$columna] = $this->$columna; //$this es la instancia del objeto en memoria, en este caso (propiedad) y $columna es el valor que contiene la columna de ese $this, seria asi: $propiedad["Casa en la playa"]. A esto se lo agrego al array atributo, el cual en cada columna ($atributos["nombre]) va recibiendo $propiedad["Casa en la playa"].
+            }
+            return $atributos;
+        }
+
+        public function sanitizarAtributos() : array {
+            $atributos = $this->atributos();
+            $sanitizado = [];
+
+            foreach($atributos as $key => $value ) {    //key es el nombre de la columna, value es el valor que almacena esa columna
+                $sanitizado[$key] = self::$db->escape_string($value);   //sanitizo cada valor
+            }
+            return $sanitizado;
+        }
+
+        //GUARDAR LOS DATOS EN LA BD
+        public function guardar() : bool {
             //Guardar valores sanitizados
             $atributos = $this->sanitizarAtributos();   //ejecuto la funcion de sanitizar y con this-> accedo a los valores que me retorna esa funcion, a esos valores los guardo en atributos
             
@@ -55,28 +84,8 @@
             return $resultado;
         }
 
-        //Identificar y unir los atributos de la BD
-        public function atributos() {
-            $atributos = [];
-            foreach(self::$columnasDB as  $columna) {
-                if($columna === "id") continue; //al id no hay que sanitizarlo, por eso no lo guardo en el array atributos. El continue hace que no se ejecute lo que esté debajo, y el foreach siga con el siguiente elemento
-                $atributos[$columna] = $this->$columna; //$this es la instancia del objeto en memoria, en este caso (propiedad) y $columna es el valor que contiene la columna de ese $this, seria asi: $propiedad["Casa en la playa"]. A esto se lo agrego al array atributo, el cual en cada columna ($atributos["nombre]) va recibiendo $propiedad["Casa en la playa"].
-            }
-            return $atributos;
-        }
-
-        public function sanitizarAtributos() {
-            $atributos = $this->atributos();
-            $sanitizado = [];
-
-            foreach($atributos as $key => $value ) {    //key es el nombre de la columna, value es el valor que almacena esa columna
-                $sanitizado[$key] = self::$db->escape_string($value);   //sanitizo cada valor
-            }
-            return $sanitizado;
-        }
-
-        //Validacion
-        public static function getErrores() {
+        //VALIDACION
+        public static function getErrores() : array {
             return self::$errores;
         }
 
@@ -100,7 +109,7 @@
                 self::$errores[] = "La capacidad del garage es obligatorio";
             }
             if(!$this->vendedores_id) {
-                self::$errores[] = "El nombre del vendedor es obligatorio";
+                self::$errores[] = "El vendedor es obligatorio";
             }
             if(!$this->imagen) {
                 self::$errores[] = "La imagen es obligatoria";
@@ -108,16 +117,10 @@
             return self::$errores;
         }
 
-        //Subida de archivos
-        public function setImagen($imagen) {
-            //Asignar al atributo de imagen el nombre de la imagen
-            if($imagen) {
-                $this->imagen = $imagen;
-            }
-        }
+        
 
-        //Listar todas las propiedades
-        public static function all() {
+        //LISTAR TODAS LAS PROPIEDADES
+        public static function all() : array {
            $query = "SELECT * FROM propiedades";
            //Consulto la bd y cambio el array con arrays asociativos que me devuelve sql, por un array de objetos
            $resultado = self::consultarSQL($query);
@@ -126,7 +129,7 @@
            return $resultado;
         }
 
-        public static function consultarSQL($query) {   //traigo el string
+        public static function consultarSQL($query) : array {   //traigo el string
             //Consultar la BD
             $resultado = self::$db->query($query);
 
@@ -143,14 +146,29 @@
             return $array;
         }
 
-        protected static function crearObjeto($registro) {
+        protected static function crearObjeto($registro) : object {
             $objeto = new self; //crea nuevos objetos de la clase actual con sus propiedades vacias. Es como crear una nueva instancia. ACtiveRecord trabaja con objetos no con arreglos asociativos para agrupar las propiedades
             foreach($registro as $key => $value) {  //recorro el array asociativo
-                if(property_exists($objeto, $key)) {    //si existe propiedad
+                if(property_exists($objeto, $key)) {    //revisa que una propiedad o atributo del array exista
                     $objeto->$key = $value; //le asigno el valor que hay en el array asociativo a la columna del objeto
                 }
             }
             return $objeto;
+        }
+
+        //BUSCAR PROPIEDAD POR ID
+        public static function find($id) : object {
+            $query = "SELECT * FROM propiedades WHERE id = ${id}";
+            $resultado = self::consultarSQL($query);    //devuelve array con 1 objeto
+            return array_shift($resultado); //array_shift devuelve la primera posicion del array
+        }
+        //MODIFICAR EL OBJETO EN MEMORIA
+        public function sincronizar($args = []) {   //el array $args trae todas las propiedades/atributos del objeto. Si no existen, lo inicio vacio
+            foreach($args as $key => $value) {  //recorro cada una de las propiedades
+                if(property_exists($this, $key) && !is_null($value)) {  //mientras la columna($key) exista en el objeto($this) y la columna no esté vacia
+                    $this->$key = $value;   //le paso el valor de la columna al objeto en memoria
+                } 
+            }           
         }
     }
     

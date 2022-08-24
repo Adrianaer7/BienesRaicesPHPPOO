@@ -22,15 +22,15 @@
     //Ejecutar el codigo despues que el usuario envia el codigo
     if($_SERVER["REQUEST_METHOD"] === "POST") {
         //Instancio la clase
-        $propiedad = new Propiedad($_POST);
+        $propiedad = new Propiedad($_POST["propiedad"]);    //en el name de cada input, le agrego propiedad["name"] para que el $_POST cree un array con todos los datos.
 
         //Generar un nombre unico para cada archivo
-        $extension = pathinfo($_FILES["imagen"]["name"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
+        $extension = pathinfo($_FILES["propiedad"]["name"]["imagen"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
         $nombreImagen = md5(uniqid(rand(), true)).".$extension";  //mk5 devuelve un hash estatico. iniqid genera aleatorios
 
         //Realizar resize a la imagen con Intervention
-        if($_FILES["imagen"]["tmp_name"]) {  //si existe una imagen
-            $image = Image::make($_FILES["imagen"]["tmp_name"])->fit(800,600);  //hago un recorte de resolucion de la imagen
+        if($_FILES["propiedad"]["tmp_name"]["imagen"]) {  //si existe una imagen
+            $image = Image::make($_FILES["propiedad"]["tmp_name"]["imagen"])->fit(800,600);  //hago un recorte de resolucion de la imagen
             $propiedad->setImagen($nombreImagen);   //envio el nombre de la imagen a la propiedad de la clase
         }
 

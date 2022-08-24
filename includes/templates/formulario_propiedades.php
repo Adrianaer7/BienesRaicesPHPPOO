@@ -4,7 +4,7 @@
                 <label for="titulo">Titulo:</label>
                 <input 
                     type="text" 
-                    name="titulo" 
+                    name="propiedad[titulo]"
                     id="titulo" 
                     placeholder="Titulo Propiedad" 
                     value="<?php echo s($propiedad->titulo); ?>"
@@ -13,7 +13,7 @@
                 <label for="precio">Precio:</label>
                 <input 
                     type="number" 
-                    name="precio" 
+                    name="propiedad[precio]" 
                     id="precio" 
                     placeholder="Precio Propiedad" 
                     value="<?php echo s($propiedad->precio) ?>"
@@ -22,14 +22,20 @@
                 <label for="imagen">Imagen:</label>
                 <input 
                     type="file" 
-                    name="imagen" 
+                    name="propiedad[imagen]" 
                     id="imagen"
                     accept="image/jpeg, image/png" 
                 >
-
+                <?php if($propiedad->imagen) { ?>
+                    <img 
+                        class="imagen-small"
+                        src="/imagenes/<?php echo $propiedad->imagen ?>" 
+                        alt="imagen propiedad"
+                    >
+                <?php } ?>
                 <label for="descripcion">Descripcion:</label>
                 <textarea 
-                    name="descripcion" 
+                    name="propiedad[descripcion]" 
                     id="descripcion"
                 ><?php echo s($propiedad->descripcion); ?></textarea>
             </fieldset>
@@ -40,7 +46,7 @@
                 <label for="habitaciones">Habitaciones:</label>
                 <input 
                     type="number" 
-                    name="habitaciones" 
+                    name="propiedad[habitaciones]" 
                     id="habitaciones" 
                     placeholder="Ej. 3" 
                     min="1" 
@@ -51,7 +57,7 @@
                 <label for="wc">Baños:</label>
                 <input 
                     type="number" 
-                    name="wc" 
+                    name="propiedad[wc]" 
                     id="wc" 
                     placeholder="Ej. 1" 
                     min="1"
@@ -62,7 +68,7 @@
                 <label for="estacionamiento">Estacionamiento:</label>
                 <input 
                     type="number" 
-                    name="estacionamiento" 
+                    name="propiedad[estacionamiento]" 
                     id="estacionamiento" 
                     placeholder="Ej. 2" 
                     min="1" 
@@ -73,6 +79,6 @@
 
             <fieldset>
                 <legend>Vendedor</legend>
-
+                <input type="text" name="propiedad[vendedores_id]" value="1">
                 
             </fieldset>
