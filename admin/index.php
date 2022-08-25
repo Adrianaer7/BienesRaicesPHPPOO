@@ -23,13 +23,10 @@
             $propiedad = mysqli_fetch_assoc($resultado);
             unlink("../imagenes/" . $propiedad["imagen"]);
             
+            //Consultar para obtener los datos de la propiedad
+            $propiedad = Propiedad::find($id);
             //Elimino la propiedad
-            $query = "DELETE FROM propiedades WHERE id = $id";
-            $resultado = mysqli_query($db, $query);
-            //Redirecciono
-            if($resultado) {
-                header("Location: /admin?resultado=3");
-            }
+            $propiedad->eliminar();
         }
     }
 ?>

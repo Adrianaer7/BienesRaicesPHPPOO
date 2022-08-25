@@ -48,12 +48,7 @@
             $image->save(CARPETA_IMAGENES . $nombreImagen);
              
             //Guardo en la BD
-            $resultado = $propiedad->guardar();
-
-            //Redireccionar
-            if($resultado) {
-                header("Location: /admin?resultado=1"); //no se puede usar en el html. Le paso el string resultado para que en el index se lo muestre
-            }
+            $propiedad->guardar();
         }
     }
 

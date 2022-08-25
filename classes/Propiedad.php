@@ -28,7 +28,7 @@
 
         public function __construct($args = []) //$args es el array $_POST que le paso a la instancia de esta clase
         {
-            $this->id = $args["id"] ?? "";
+            $this->id = $args["id"] ?? null;
             $this->titulo = $args["titulo"] ?? "";
             $this->precio = $args["precio"] ?? "";
             $this->imagen = $args["imagen"] ?? "";
@@ -42,6 +42,10 @@
 
         //Subida de archivos
         public function setImagen($imagen) {
+            //Eliminar imagen previa al seleccionar una nueva
+            if(!is_null($this->id)) { //si existe y tiene valor la id es porque estoy editando
+                $this->borrarImagen();
+            }
             //Asignar al atributo de imagen el nombre de la imagen
             if($imagen) {
                 $this->imagen = $imagen;
@@ -69,19 +73,47 @@
         }
 
         //GUARDAR LOS DATOS EN LA BD
-        public function guardar() : bool {
+        public function guardar() {
+            if((!is_null($this->id))) {  //Actualizar
+                $this->actualizar();
+            } else {    //Crear nuevo
+                $this->crear();
+            }
+        }
+
+        public function crear() {
             //Guardar valores sanitizados
             $atributos = $this->sanitizarAtributos();   //ejecuto la funcion de sanitizar y con this-> accedo a los valores que me retorna esa funcion, a esos valores los guardo en atributos
-            
             //Insertar en la BD
             $query = "INSERT INTO propiedades (";
             $query .= join(', ', array_keys($atributos));   //con el .= concateno en un string lo que haya en este renglon más lo que habia en el anterior. Join es como split de js. array_keys son las llaves o columnas del array atributos
             $query .= ") VALUES ('";
             $query .= join("', '", array_values($atributos));   //array_values son los valores de las columnas
             $query .= "')";
-
             $resultado = self::$db->query($query);  //resultado devuelve true. Con db->query accedo al metodo que forma parte de la instancia de mysqli y sirve para hacer la consulta
-            return $resultado;
+            
+            if($resultado) {
+                header("Location: /admin?resultado=1");
+            }
+        }
+
+        public function actualizar() {
+            //Guardar valores sanitizados
+            $atributos = $this->sanitizarAtributos();
+            //Insertar en la BD
+            $valores = [];
+            foreach($atributos as $key => $value) {
+                $valores[] = "$key='$value'";
+            }
+            $query = "UPDATE propiedades SET ";
+            $query .= join(", ", $valores);
+            $query .= " WHERE id = '" . self::$db->escape_string($this->id) . "'";
+            $query .= " LIMIT 1 ";
+            $resultado = self::$db->query($query);
+            
+            if($resultado) {
+                header("Location: /admin?resultado=2");
+            }
         }
 
         //VALIDACION
@@ -162,13 +194,33 @@
             $resultado = self::consultarSQL($query);    //devuelve array con 1 objeto
             return array_shift($resultado); //array_shift devuelve la primera posicion del array
         }
-        //MODIFICAR EL OBJETO EN MEMORIA
+
+        //ACTUALIZAR - MODIFICAR EL OBJETO EN MEMORIA
         public function sincronizar($args = []) {   //el array $args trae todas las propiedades/atributos del objeto. Si no existen, lo inicio vacio
             foreach($args as $key => $value) {  //recorro cada una de las propiedades
                 if(property_exists($this, $key) && !is_null($value)) {  //mientras la columna($key) exista en el objeto($this) y la columna no esté vacia
                     $this->$key = $value;   //le paso el valor de la columna al objeto en memoria
                 } 
             }           
+        }
+
+        //ELIMINAR
+        public function eliminar() {
+            $query = "DELETE FROM propiedades WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1 ";
+            $resultado = self::$db->query($query);
+
+            if($resultado) {
+                $this->borrarImagen();
+                header("Location: /admin?resultado=3");
+            }
+        }
+
+        public function borrarImagen() {
+            //Comprobar si existe un archivo
+            $existeArchivo = file_exists(CARPETA_IMAGENES . $this->imagen); //this->imagen contiene el nombre de la imagen que traigo de la bd
+            if($existeArchivo) {
+                unlink(CARPETA_IMAGENES . $this->imagen);
+            }
         }
     }
     

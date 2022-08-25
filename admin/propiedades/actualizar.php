@@ -1,8 +1,8 @@
 <?php
-
-    use App\Propiedad;
-
     require "../../includes/app.php";
+    use App\Propiedad;
+    use Intervention\Image\ImageManagerStatic as Image;
+
     incluirTemplate("header", $pagina = "Admin - Actualizar");
     estadoAutenticado();
     
@@ -27,7 +27,7 @@
     $resultado = mysqli_query($db, $consulta);
 
     //Arreglo con mensaje de error
-    $errores = [];
+    $errores = Propiedad::getErrores();
 
     $titulo = $propiedad->titulo;
     $precio = $propiedad->precio;
@@ -42,78 +42,34 @@
     if($_SERVER["REQUEST_METHOD"] === "POST") {
         //Asignar los atributos
         $args = $_POST["propiedad"];  //en el name de cada input, le agrego propiedad["name"] para que el $_POST cree un array con todos los datos. De esta manera le paso solo ese array a los args
-        
+
+        //Actualizar los atributos en memoria
         $propiedad->sincronizar($args); //modifico el objeto original por el objeto que está en memoria
-        debugear($propiedad);
-        //Asignar files hacia una variable. Los archivos no se leen por $_POST, sino por $_FILES
-        $imagen = $_FILES["propiedad"]["imagen"];    //accedo al name del input
+
+        //Subida de archivos
+        //Generar un nombre unico para cada archivo
+        $extension = pathinfo($_FILES["propiedad"]["name"]["imagen"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
+        $nombreImagen = md5(uniqid(rand(), true)).".$extension";  //mk5 devuelve un hash estatico. iniqid genera aleatorios
         
 
-        if(!$titulo) {
-            $errores[] = "El titulo es obligatorio";
-        }
-        if(!$precio) {
-            $errores[] = "El precio es obligatorio";
-        }
-        if(strlen($descripcion) < 50) {
-            $errores[] = "La descripcion es obligatoria y tiene que tener como minimo 50 caracteres";
-        }
-        if(!$habitaciones) {
-            $errores[] = "El numero de habitaciones es obligatorio";
-        }
-        if(!$wc) {
-            $errores[] = "El numero de baños es obligatorio";
-        }
-        if(!$estacionamiento) {
-            $errores[] = "La capacidad del garage es obligatorio";
-        }
-        if(!$vendedores_id) {
-            $errores[] = "El nombre del vendedor es obligatorio";
-        }
+        //Validar los atributos
+        $errores = $propiedad->validar();
 
-        //Validar imagen por tamaño
-        $medida = 1000 * 1000;   //bytes a kb (1Mb maximo)
-        if($imagen["size"] > $medida) {
-            $errores[] = "La imagen es muy pesada";
-        }
-
+        
         //Revisar que el array de errores esté vacio
         if(empty($errores)) {
-            //Crear carpeta para subir imagen
-            $carpetaImagenes = "../../imagenes/";   //guardo la ubicacion donde quiero que se cree la carpeta
-            if(!is_dir($carpetaImagenes)) { //verifica si esa carpeta ya está creada
-                mkdir($carpetaImagenes);    //crea la carpeta
+            //Realizar resize a la imagen con Intervention
+            if($_FILES["propiedad"]["tmp_name"]["imagen"]) {  //si existe una imagen
+                $image = Image::make($_FILES["propiedad"]["tmp_name"]["imagen"])->fit(800,600);  //hago un recorte de resolucion de la imagen
+                $propiedad->setImagen($nombreImagen);   //envio el nombre de la imagen a la propiedad de la clase
+                
+                //Almacenar la imagen
+                $image->save(CARPETA_IMAGENES . $nombreImagen);
             }
-
-            $nombreImagen = "";
-
-            //Si el _$FILES detecta que se subio una imagen, y previamente la propiedad ya tenia una guardada, la elimino
-            if($imagen["name"]) {
-                //Eliminar imagen previa
-                unlink($carpetaImagenes . $propiedad["imagen"]);
-
-                //Generar un nombre unico para cada imagen
-                $extension = pathinfo($imagen["name"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
-                $nombreImagen = md5(uniqid(rand(), true)).".$extension";  //mk5 devuelve un hash estatico. iniqid genera aleatorios
-                //Guardar imagen en carpeta
-                move_uploaded_file($imagen["tmp_name"], $carpetaImagenes . $nombreImagen);
-            } else {
-                //si se actualiza la propiedad pero no se sube nueva imagen, sobreescribe en la bd lo que ya tenia
-                $nombreImagen = $propiedad["imagen"];
-            }
-
-
-
-            //Insertar en la bd
-            $query = "UPDATE propiedades 
-                      SET titulo = '$titulo', precio = $precio, imagen = '$nombreImagen', descripcion = '$descripcion', habitaciones = $habitaciones, wc = $wc, estacionamiento = $estacionamiento, vendedores_id = $vendedores_id
-                      WHERE id = $id";
-            $resultado = mysqli_query($db, $query);
-
-            //Redireccionar
-            if($resultado) {
-                header("Location: /admin?resultado=2"); //no se puede usar en el html. Le paso el string resultado para que en el index se lo muestre
-            }
+         
+            
+            //Guardar en la BD
+            $propiedad->guardar();
         }
     }
 
