@@ -2,12 +2,15 @@
     //Importar template
     require "../includes/app.php";
     use App\Propiedad;
+    use App\Vendedor;
 
     incluirTemplate("header", $pagina = "Admin - Inicio");
     estadoAutenticado();
 
     //Obtener las propiedades
     $propiedades = Propiedad::all();
+    $vendedores = Vendedor::all();
+    debugear($vendedores);
 
     $resultado = $_GET["resultado"] ?? null;    //busca el resultado(variable que le paso al crear una nueva propiedad) en la URL y si no existe le asigno null
 

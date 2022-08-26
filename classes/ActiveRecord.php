@@ -4,7 +4,8 @@
     class ActiveRecord {
         //BD
         protected static $db;   //protected porque solo se puede acceder a ella en la clase. Static porque no se va a crear una instancia por cada objeto nuevo, la conexion a la bd siempre es con las mismas credenciales. Esto ahorra ram
-        protected static $columnasDB = ["id", "titulo", "precio", "imagen", "descripcion", "habitaciones", "wc", "estacionamiento", "creado", "vendedores_id"];
+        protected static $columnasDB = [];
+        protected static $tabla = "";
 
         //Errores
         protected static $errores = [];
@@ -84,7 +85,7 @@
             //Guardar valores sanitizados
             $atributos = $this->sanitizarAtributos();   //ejecuto la funcion de sanitizar y con this-> accedo a los valores que me retorna esa funcion, a esos valores los guardo en atributos
             //Insertar en la BD
-            $query = "INSERT INTO propiedades (";
+            $query = "INSERT INTO " . static::$tabla . " (";    //con static:: accedo a la variable estatica que hay en el hijo de esta clase. O sea propiedades o vendedores
             $query .= join(', ', array_keys($atributos));   //con el .= concateno en un string lo que haya en este renglon más lo que habia en el anterior. Join es como split de js. array_keys son las llaves o columnas del array atributos
             $query .= ") VALUES ('";
             $query .= join("', '", array_values($atributos));   //array_values son los valores de las columnas
@@ -104,7 +105,7 @@
             foreach($atributos as $key => $value) {
                 $valores[] = "$key='$value'";
             }
-            $query = "UPDATE propiedades SET ";
+            $query = "UPDATE " . static::$tabla . " SET ";
             $query .= join(", ", $valores);
             $query .= " WHERE id = '" . self::$db->escape_string($this->id) . "'";
             $query .= " LIMIT 1 ";
@@ -152,7 +153,7 @@
 
         //LISTAR TODAS LAS PROPIEDADES
         public static function all() : array {
-           $query = "SELECT * FROM propiedades";
+           $query = "SELECT * FROM " . static::$tabla;  
            //Consulto la bd y cambio el array con arrays asociativos que me devuelve sql, por un array de objetos
            $resultado = self::consultarSQL($query);
 
@@ -189,7 +190,7 @@
 
         //BUSCAR PROPIEDAD POR ID
         public static function find($id) : object {
-            $query = "SELECT * FROM propiedades WHERE id = ${id}";
+            $query = "SELECT * FROM " . static::$tabla . " WHERE id = ${id}";
             $resultado = self::consultarSQL($query);    //devuelve array con 1 objeto
             return array_shift($resultado); //array_shift devuelve la primera posicion del array
         }
@@ -205,7 +206,7 @@
 
         //ELIMINAR
         public function eliminar() {
-            $query = "DELETE FROM propiedades WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1 ";
+            $query = "DELETE FROM " . static::$tabla . " WHERE id = " . self::$db->escape_string($this->id) . " LIMIT 1 ";
             $resultado = self::$db->query($query);
 
             if($resultado) {
