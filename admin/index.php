@@ -17,14 +17,9 @@
         $id = filter_var($id, FILTER_VALIDATE_INT); //valida que sea un numero
 
         if($id) {
-            //Elimino la imagen
-            $query = "SELECT imagen FROM propiedades WHERE id = $id";
-            $resultado = mysqli_query($db, $query);
-            $propiedad = mysqli_fetch_assoc($resultado);
-            unlink("../imagenes/" . $propiedad["imagen"]);
-            
             //Consultar para obtener los datos de la propiedad
             $propiedad = Propiedad::find($id);
+            
             //Elimino la propiedad
             $propiedad->eliminar();
         }
