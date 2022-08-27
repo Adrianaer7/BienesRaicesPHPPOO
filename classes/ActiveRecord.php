@@ -10,35 +10,12 @@
         //Errores
         protected static $errores = [];
 
-        public $id;
-        public $titulo;
-        public $precio;
-        public $imagen;
-        public $descripcion;
-        public $habitaciones;
-        public $wc;
-        public $estacionamiento;
-        public $creado;
-        public $vendedores_id;
-
+        
         //DEFINIR CONEXION A LA BD
         public static function setDB($database) {   //recibo $dabatase del app.php que es donde se ejecuta este metodo
             self::$db = $database;  //con self:: envio database a la variable estatica que hay en la clase 
         }
 
-        public function __construct($args = []) //$args es el array $_POST que le paso a la instancia de esta clase
-        {
-            $this->id = $args["id"] ?? null;
-            $this->titulo = $args["titulo"] ?? "";
-            $this->precio = $args["precio"] ?? "";
-            $this->imagen = $args["imagen"] ?? "";
-            $this->descripcion = $args["descripcion"] ?? "";
-            $this->habitaciones = $args["habitaciones"] ?? "";
-            $this->wc = $args["wc"] ?? "";
-            $this->estacionamiento = $args["estacionamiento"] ?? "";
-            $this->creado = date("Y/m/d");
-            $this->vendedores_id = $args["vendedores_id"] ?? "";
-        }
 
         //Subida de archivos
         public function setImagen($imagen) {
@@ -179,7 +156,7 @@
         }
 
         protected static function crearObjeto($registro) : object {
-            $objeto = new self; //crea nuevos objetos de la clase actual con sus propiedades vacias. Es como crear una nueva instancia. ACtiveRecord trabaja con objetos no con arreglos asociativos para agrupar las propiedades
+            $objeto = new static;   //crea una variable con los mismos atributos que $tabla tiene en propiedades o vendedores. Si le pongo new self, crea una variable con los atributos de $tabla tiene en esta clase
             foreach($registro as $key => $value) {  //recorro el array asociativo
                 if(property_exists($objeto, $key)) {    //revisa que una propiedad o atributo del array exista
                     $objeto->$key = $value; //le asigno el valor que hay en el array asociativo a la columna del objeto
