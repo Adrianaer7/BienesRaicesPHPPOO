@@ -1,20 +1,16 @@
 <?php 
     require "../../includes/app.php";
     use App\Propiedad;
+    use App\Vendedor;
     use Intervention\Image\ImageManagerStatic as Image;
 
     incluirTemplate("header", $pagina = "Admin - Crear");
     estadoAutenticado();
 
-    //Base de datos
-    $db = conectarDB();
 
     //Instancia vacia
     $propiedad = new Propiedad;
-
-    //Consultar para obtener los vendedores
-    $consulta = "SELECT * FROM vendedores";
-    $resultado = mysqli_query($db, $consulta);
+    $vendedores = Vendedor::all();
 
     //Arreglo con mensaje de error
     $errores = Propiedad::getErrores(); //la primera vez va a estar vacio. Esto es para que no marque unedefined
@@ -36,7 +32,7 @@
 
         //Valido los datos
         $errores = $propiedad->validar();
-
+        
         //Revisar que el array de errores esté vacio
         if(empty($errores)) {
             //Crear carpeta para las imagenes si no existe

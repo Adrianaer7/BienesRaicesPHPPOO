@@ -29,6 +29,34 @@
             $this->creado = date("Y/m/d");
             $this->vendedores_id = $args["vendedores_id"] ?? "";
         }
+
+        public function validar() {
+            if(!$this->titulo) {
+                self::$errores[] = "El titulo es obligatorio";  //envio el texto a la variable estatica en la clase padre
+            }
+            if(!$this->precio) {
+                self::$errores[] = "El precio es obligatorio";
+            }
+            if(strlen($this->descripcion) < 50) {
+                self::$errores[] = "La descripcion es obligatoria y tiene que tener como minimo 50 caracteres";
+            }
+            if(!$this->habitaciones) {
+                self::$errores[] = "El numero de habitaciones es obligatorio";
+            }
+            if(!$this->wc) {
+                self::$errores[] = "El numero de baños es obligatorio";
+            }
+            if(!$this->estacionamiento) {
+                self::$errores[] = "La capacidad del garage es obligatorio";
+            }
+            if(!$this->vendedores_id) {
+                self::$errores[] = "El vendedor es obligatorio";
+            }
+            if(!$this->imagen) {
+                self::$errores[] = "La imagen es obligatoria";
+            }
+            return self::$errores;  //devuelvo a la vista la variable de la clase padre
+        }
     }
     
 ?>

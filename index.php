@@ -28,10 +28,7 @@
 
     <section class="contenedor seccion">
         <h2>Casas y Departamentos en venta</h2>
-        <?php 
-            $limite = 3;    //paso esta variable al include
-            include "includes/templates/anuncios.php";
-        ?>
+        <?php include "includes/templates/anuncios.php"; ?>
 
         <div class="alinear-derecha">
             <a href="anuncios.php"  class="boton-verde">Ver todas</a>

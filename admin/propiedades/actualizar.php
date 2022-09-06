@@ -1,6 +1,7 @@
 <?php
     require "../../includes/app.php";
     use App\Propiedad;
+    use App\Vendedor;
     use Intervention\Image\ImageManagerStatic as Image;
 
     incluirTemplate("header", $pagina = "Admin - Actualizar");
@@ -12,33 +13,19 @@
     if(!$id) {
         header("Location:/admin");
     }
-    //Base de datos
-    $db = conectarDB();
 
     //Consultar para obtener los datos de la propiedad
     $propiedad = Propiedad::find($id);
-
+    $vendedores = Vendedor::all();
     //Validar que la id que pongo en la url sea existente en la BD
     if($propiedad->id != $id) {
         header("Location: /admin");
     }
-    //Consultar los vendedores
-    $consulta = "SELECT * FROM vendedores";
-    $resultado = mysqli_query($db, $consulta);
 
     //Arreglo con mensaje de error
     $errores = Propiedad::getErrores();
 
-    $titulo = $propiedad->titulo;
-    $precio = $propiedad->precio;
-    $imagenPropiedad= $propiedad->imagen;
-    $descripcion = $propiedad->descripcion;
-    $habitaciones = $propiedad->habitaciones;
-    $wc = $propiedad->wc;
-    $estacionamiento = $propiedad->estacionamiento;
-    $vendedores_id = $propiedad->vendedores_id;
-
-    //Ejecutar el codigo despues que el usuario envia el codigo
+    //Ejecutar el codigo despues que el usuario envia el form
     if($_SERVER["REQUEST_METHOD"] === "POST") {
         //Asignar los atributos
         $args = $_POST["propiedad"];  //en el name de cada input, le agrego propiedad["name"] para que el $_POST cree un array con todos los datos. De esta manera le paso solo ese array a los args
@@ -51,10 +38,8 @@
         $extension = pathinfo($_FILES["propiedad"]["name"]["imagen"], PATHINFO_EXTENSION); //La función pathinfo recibe en primer lugar una cadena, la cual representa al nombre del archivo. Y como segundo argumento una constante indicando qué información queremos extraer.
         $nombreImagen = md5(uniqid(rand(), true)).".$extension";  //mk5 devuelve un hash estatico. iniqid genera aleatorios
         
-
         //Validar los atributos
         $errores = $propiedad->validar();
-
         
         //Revisar que el array de errores esté vacio
         if(empty($errores)) {
@@ -67,14 +52,11 @@
                 $image->save(CARPETA_IMAGENES . $nombreImagen);
             }
          
-            
             //Guardar en la BD
             $propiedad->guardar();
         }
     }
-
 ?>
-
 
     <main class="contenedor seccion">
         <h1>Actualizar propiedad</h1>

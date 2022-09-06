@@ -26,7 +26,7 @@
                     id="imagen"
                     accept="image/jpeg, image/png" 
                 >
-                <?php if($propiedad->imagen) { ?>
+                <?php if($propiedad->imagen && $_SERVER["SCRIPT_NAME"] !== "/admin/propiedades/crear.php") { ?>
                     <img 
                         class="imagen-small"
                         src="/imagenes/<?php echo $propiedad->imagen ?>" 
@@ -79,6 +79,14 @@
 
             <fieldset>
                 <legend>Vendedor</legend>
-                <input type="text" name="propiedad[vendedores_id]" value="1">
+                <label for="vendedor">Vendedor</label>
+                <select name="propiedad[vendedores_id]" id="vendedor">
+                    <option value="">-- Seleccione --</option>
+                    <?php foreach($vendedores as $vendedor) { ?>
+                        <option
+                            <?php echo $propiedad->vendedores_id === $vendedor->id ? "selected" : ""; ?>
+                            value="<?php echo s($vendedor->id)?>"><?php echo s($vendedor->nombre) . " " . s($vendedor->apellido); ?></option>
+                    <?php }; ?>
+                </select>
                 
             </fieldset>

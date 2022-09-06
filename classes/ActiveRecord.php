@@ -32,7 +32,7 @@
         //Identificar y unir los atributos de la BD
         public function atributos() : array {
             $atributos = [];
-            foreach(self::$columnasDB as  $columna) {
+            foreach(static::$columnasDB as  $columna) {
                 if($columna === "id") continue; //al id no hay que sanitizarlo, por eso no lo guardo en el array atributos. El continue hace que no se ejecute lo que esté debajo, y el foreach siga con el siguiente elemento
                 $atributos[$columna] = $this->$columna; //$this es la instancia del objeto en memoria, en este caso (propiedad) y $columna es el valor que contiene la columna de ese $this, seria asi: $propiedad["Casa en la playa"]. A esto se lo agrego al array atributo, el cual en cada columna ($atributos["nombre]) va recibiendo $propiedad["Casa en la playa"].
             }
@@ -95,35 +95,13 @@
 
         //VALIDACION
         public static function getErrores() : array {
-            return self::$errores;
+            return static::$errores;
         }
 
+        //Esta funcion de momento no es necesaria ya que se utiliza en la clase propiedad
         public function validar() {
-            if(!$this->titulo) {
-                self::$errores[] = "El titulo es obligatorio";
-            }
-            if(!$this->precio) {
-                self::$errores[] = "El precio es obligatorio";
-            }
-            if(strlen($this->descripcion) < 50) {
-                self::$errores[] = "La descripcion es obligatoria y tiene que tener como minimo 50 caracteres";
-            }
-            if(!$this->habitaciones) {
-                self::$errores[] = "El numero de habitaciones es obligatorio";
-            }
-            if(!$this->wc) {
-                self::$errores[] = "El numero de baños es obligatorio";
-            }
-            if(!$this->estacionamiento) {
-                self::$errores[] = "La capacidad del garage es obligatorio";
-            }
-            if(!$this->vendedores_id) {
-                self::$errores[] = "El vendedor es obligatorio";
-            }
-            if(!$this->imagen) {
-                self::$errores[] = "La imagen es obligatoria";
-            }
-            return self::$errores;
+            static::$errores = [];  //en cada clase que utilize esta funcion, le declaro desde aca un arreglo vacio para errores
+            return static::$errores;
         }
 
         
@@ -138,6 +116,16 @@
            return $resultado;
         }
 
+        //Obtiene un numero determinado de registros
+        public static function get($cantidad) : array {
+            $query = "SELECT * FROM " . static::$tabla . " LIMIT " . $cantidad;  
+            //Consulto la bd y cambio el array con arrays asociativos que me devuelve sql, por un array de objetos
+            $resultado = self::consultarSQL($query);
+ 
+            //Envio el resultado al index
+            return $resultado;
+         }
+
         public static function consultarSQL($query) : array {   //traigo el string
             //Consultar la BD
             $resultado = self::$db->query($query);
@@ -145,7 +133,7 @@
             //Iterar los resultados
             $array = [];
             while($registro = $resultado->fetch_assoc()) {  //por cada elemento que hay en $resultado
-                $array[] = self::crearObjeto($registro);    //lo inserto en el array en forma de objeto
+                $array[] = static::crearObjeto($registro);    //lo inserto en el array en forma de objeto
             }
             
             //Liberar memoria

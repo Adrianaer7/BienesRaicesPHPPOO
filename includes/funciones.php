@@ -30,3 +30,29 @@ function s($html) {
     $s = htmlspecialchars($html);
     return $s;
 }
+
+//Validar tipo de contenido a $_POST
+function validarTipoContenido($tipo) {
+    $tipos = ["vendedor", "propiedad"];
+    return in_array($tipo, $tipos); //in_array busca valores en el array. Recibe dos parametros, el parametro que le llega a la funcion, y el array en donde hay que buscar
+}
+
+function mostrarNotificacion($codigo) {
+    $mensaje = "";
+
+    switch($codigo) {
+        case 1:
+            $mensaje = "Creado correctamente";
+            break;
+        case 2:
+            $mensaje = "Actualizado correctamente";
+            break;
+        case 3:
+            $mensaje = "Eliminado correctamente";
+            break;
+        default: 
+            $mensaje = false;
+            break;
+    }
+    return $mensaje;
+}
